@@ -1,0 +1,25 @@
+{
+    "configurations": [
+        {
+            "name": "stm32l0",
+            "includePath": [
+                "${workspaceFolder}/Core/Inc",
+                "${workspaceFolder}/Drivers/STM32L0xx_HAL_Driver/Inc",
+                "${workspaceFolder}/Drivers/STM32L0xx_HAL_Driver/Inc/Legacy",
+                "${workspaceFolder}/Drivers/CMSIS/Device/ST/STM32L0xx/Include",
+                "${workspaceFolder}/Drivers/CMSIS/Include"
+            ],
+            "defines": [
+                "DEBUG",
+                "USE_HAL_DRIVER",
+                "STM32L031xx"
+            ],
+            "windowsSdkVersion": "10.0.19041.0",
+            "compilerPath": "C:/Tools/cygwin64/bin/gcc.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "windows-gcc-x86"
+        }
+    ],
+    "version": 4
+}

@@ -1,0 +1,20 @@
+### Debug folder ###
+# object files
+Debug/**/*.o
+# dependency files
+Debug/**/*.d
+# stack usage files
+Debug/**/*.su
+# cyclomatic files
+Debug/**/*.cyclo
+# makefiles
+Debug/**/*.mk
+Debug/makefile
+# list files
+Debug/**/*.list
+# ELF file
+Debug/*.elf
+# map file
+Debug/*.map
+# text or log file
+Debug/*.txt
