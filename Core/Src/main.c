@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "cmsis_os.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -31,7 +32,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define PERIOD_TASK_1000ms  1000
+#define PERIOD_TASK_100ms  100
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -42,6 +44,9 @@
 /* Private variables ---------------------------------------------------------*/
 UART_HandleTypeDef huart2;
 
+osThreadId idleTaskHandle;
+osThreadId Task1000msHandle;
+osThreadId Task100msHandle;
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -50,6 +55,10 @@ UART_HandleTypeDef huart2;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
+void StartDefaultTask(void const * argument);
+void stm32_Task1000ms(void const * argument);
+void stm32_Task_100ms(void const * argument);
+
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -92,6 +101,42 @@ int main(void)
 
   /* USER CODE END 2 */
 
+  /* USER CODE BEGIN RTOS_MUTEX */
+  /* add mutexes, ... */
+  /* USER CODE END RTOS_MUTEX */
+
+  /* USER CODE BEGIN RTOS_SEMAPHORES */
+  /* add semaphores, ... */
+  /* USER CODE END RTOS_SEMAPHORES */
+
+  /* USER CODE BEGIN RTOS_TIMERS */
+  /* start timers, add new ones, ... */
+  /* USER CODE END RTOS_TIMERS */
+
+  /* USER CODE BEGIN RTOS_QUEUES */
+  /* add queues, ... */
+  /* USER CODE END RTOS_QUEUES */
+
+  /* Create the thread(s) */
+  /* definition and creation of idleTask */
+  osThreadDef(idleTask, StartDefaultTask, osPriorityIdle, 0, 128);
+  idleTaskHandle = osThreadCreate(osThread(idleTask), NULL);
+
+  /* definition and creation of Task1000ms */
+  osThreadDef(Task1000ms, stm32_Task1000ms, osPriorityAboveNormal, 0, 128);
+  Task1000msHandle = osThreadCreate(osThread(Task1000ms), NULL);
+
+  /* definition and creation of Task100ms */
+  osThreadDef(Task100ms, stm32_Task_100ms, osPriorityNormal, 0, 128);
+  Task100msHandle = osThreadCreate(osThread(Task100ms), NULL);
+
+  /* USER CODE BEGIN RTOS_THREADS */
+  /* add threads, ... */
+  /* USER CODE END RTOS_THREADS */
+
+  /* Start scheduler */
+  osKernelStart();
+  /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
@@ -221,6 +266,96 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
+
+/* USER CODE BEGIN Header_StartDefaultTask */
+/**
+  * @brief  Function implementing the idleTask thread.
+  * @param  argument: Not used
+  * @retval None
+  */
+/* USER CODE END Header_StartDefaultTask */
+void StartDefaultTask(void const * argument)
+{
+  /* USER CODE BEGIN 5 */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END 5 */
+}
+
+/* USER CODE BEGIN Header_stm32_Task1000ms */
+/**
+* @brief Function implementing the stm32_Task1000m thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_stm32_Task1000ms */
+void stm32_Task1000ms(void const * argument)
+{
+  /* USER CODE BEGIN stm32_Task1000ms */
+  TickType_t xLastWakeTime;
+
+  #ifndef osCMSIS
+  const TickType_t xFrequency = pdMS_TO_TICKS(PERIOD_TASK_1000ms);
+  #else
+  const TickType_t xFrequency = PERIOD_TASK_1000ms;
+  #endif
+
+  #ifndef osCMSIS
+  xLastWakeTime = xTaskGetTickCount();
+  #else
+  xLastWakeTime = osKernelSysTick();
+  #endif
+
+  /* Infinite loop */
+  for(;;)
+  {
+    #ifndef osCMSIS
+    vTaskDelayUntil(&xLastWakeTime, xFrequency);
+    #else
+    osDelayUntil(&xLastWakeTime, xFrequency);
+    #endif
+  }
+  /* USER CODE END stm32_Task1000ms */
+}
+
+/* USER CODE BEGIN Header_stm32_Task_100ms */
+/**
+* @brief Function implementing the Task100ms thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_stm32_Task_100ms */
+void stm32_Task_100ms(void const * argument)
+{
+  /* USER CODE BEGIN stm32_Task_100ms */
+  TickType_t xLastWakeTime;
+
+  #ifndef osCMSIS
+  const TickType_t xFrequency = pdMS_TO_TICKS(PERIOD_TASK_100ms);
+  #else
+  const TickType_t xFrequency = PERIOD_TASK_100ms;
+  #endif
+
+  #ifndef osCMSIS
+  xLastWakeTime = xTaskGetTickCount();
+  #else
+  xLastWakeTime = osKernelSysTick();
+  #endif
+
+  /* Infinite loop */
+  for(;;)
+  {
+    #ifndef osCMSIS
+    vTaskDelayUntil(&xLastWakeTime, xFrequency);
+    #else
+    osDelayUntil(&xLastWakeTime, xFrequency);
+    #endif
+  }
+  /* USER CODE END stm32_Task_100ms */
+}
 
 /**
   * @brief  This function is executed in case of error occurrence.
