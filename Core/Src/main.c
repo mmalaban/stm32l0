@@ -112,11 +112,11 @@ int main(void)
 
   /* Create the thread(s) */
   /* definition and creation of idleTask */
-  osThreadDef(idleTask, StartDefaultTask, osPriorityIdle, 0, 128);
+  osThreadDef(idleTask, StartDefaultTask, osPriorityIdle, 0, 64);
   idleTaskHandle = osThreadCreate(osThread(idleTask), NULL);
 
   /* definition and creation of Task10ms */
-  osThreadDef(Task10ms, stm32_Task_10ms, osPriorityNormal, 0, 128);
+  osThreadDef(Task10ms, stm32_Task_10ms, osPriorityNormal, 0, 64);
   Task10msHandle = osThreadCreate(osThread(Task10ms), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
