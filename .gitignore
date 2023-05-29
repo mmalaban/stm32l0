@@ -18,3 +18,4 @@ Debug/*.elf
 Debug/*.map
 # text or log file
 Debug/*.txt
+/Debug/

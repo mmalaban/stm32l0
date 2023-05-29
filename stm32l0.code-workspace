@@ -18,6 +18,10 @@
 			".settings": true,
 			"stm32l0.ioc": true,
 			"stm32l0 Debug.launch": true,
+		},
+		"files.associations": {
+			"*.h": "c",
+			"*.c": "c"
 		}
 	}
 }

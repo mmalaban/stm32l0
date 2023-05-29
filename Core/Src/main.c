@@ -22,7 +22,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "bsp.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -32,8 +32,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define PERIOD_TASK_1000ms  1000
-#define PERIOD_TASK_100ms  100
+#define PERIOD_TASK_10ms  10u
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -42,22 +41,17 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-UART_HandleTypeDef huart2;
-
 osThreadId idleTaskHandle;
-osThreadId Task1000msHandle;
-osThreadId Task100msHandle;
+osThreadId Task10msHandle;
 /* USER CODE BEGIN PV */
-
+static volatile uint32_t count = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_USART2_UART_Init(void);
 void StartDefaultTask(void const * argument);
-void stm32_Task1000ms(void const * argument);
-void stm32_Task_100ms(void const * argument);
+void stm32_Task_10ms(void const * argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -96,7 +90,6 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -122,13 +115,9 @@ int main(void)
   osThreadDef(idleTask, StartDefaultTask, osPriorityIdle, 0, 128);
   idleTaskHandle = osThreadCreate(osThread(idleTask), NULL);
 
-  /* definition and creation of Task1000ms */
-  osThreadDef(Task1000ms, stm32_Task1000ms, osPriorityAboveNormal, 0, 128);
-  Task1000msHandle = osThreadCreate(osThread(Task1000ms), NULL);
-
-  /* definition and creation of Task100ms */
-  osThreadDef(Task100ms, stm32_Task_100ms, osPriorityNormal, 0, 128);
-  Task100msHandle = osThreadCreate(osThread(Task100ms), NULL);
+  /* definition and creation of Task10ms */
+  osThreadDef(Task10ms, stm32_Task_10ms, osPriorityNormal, 0, 128);
+  Task10msHandle = osThreadCreate(osThread(Task10ms), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -156,7 +145,6 @@ void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
-  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
   /** Configure the main internal regulator output voltage
   */
@@ -190,47 +178,6 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART2;
-  PeriphClkInit.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
-  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
-  {
-    Error_Handler();
-  }
-}
-
-/**
-  * @brief USART2 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_USART2_UART_Init(void)
-{
-
-  /* USER CODE BEGIN USART2_Init 0 */
-
-  /* USER CODE END USART2_Init 0 */
-
-  /* USER CODE BEGIN USART2_Init 1 */
-
-  /* USER CODE END USART2_Init 1 */
-  huart2.Instance = USART2;
-  huart2.Init.BaudRate = 115200;
-  huart2.Init.WordLength = UART_WORDLENGTH_8B;
-  huart2.Init.StopBits = UART_STOPBITS_1;
-  huart2.Init.Parity = UART_PARITY_NONE;
-  huart2.Init.Mode = UART_MODE_TX_RX;
-  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
-  huart2.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
-  huart2.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
-  if (HAL_UART_Init(&huart2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN USART2_Init 2 */
-
-  /* USER CODE END USART2_Init 2 */
-
 }
 
 /**
@@ -251,6 +198,14 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pins : PA2 PA15 */
+  GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_15;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.Alternate = GPIO_AF4_USART2;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pin : LD3_Pin */
   GPIO_InitStruct.Pin = LD3_Pin;
@@ -280,81 +235,29 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
+	  count++;
     osDelay(1);
   }
   /* USER CODE END 5 */
 }
 
-/* USER CODE BEGIN Header_stm32_Task1000ms */
+/* USER CODE BEGIN Header_stm32_Task_10ms */
 /**
-* @brief Function implementing the stm32_Task1000m thread.
+* @brief Function implementing the Task10ms thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_stm32_Task1000ms */
-void stm32_Task1000ms(void const * argument)
+/* USER CODE END Header_stm32_Task_10ms */
+void stm32_Task_10ms(void const * argument)
 {
-  /* USER CODE BEGIN stm32_Task1000ms */
-  TickType_t xLastWakeTime;
-
-  #ifndef osCMSIS
-  const TickType_t xFrequency = pdMS_TO_TICKS(PERIOD_TASK_1000ms);
-  #else
-  const TickType_t xFrequency = PERIOD_TASK_1000ms;
-  #endif
-
-  #ifndef osCMSIS
-  xLastWakeTime = xTaskGetTickCount();
-  #else
-  xLastWakeTime = osKernelSysTick();
-  #endif
-
+  /* USER CODE BEGIN stm32_Task_10ms */
   /* Infinite loop */
   for(;;)
   {
-    #ifndef osCMSIS
-    vTaskDelayUntil(&xLastWakeTime, xFrequency);
-    #else
-    osDelayUntil(&xLastWakeTime, xFrequency);
-    #endif
+    BSP_LED_Toggle();
+    osDelay(PERIOD_TASK_10ms);
   }
-  /* USER CODE END stm32_Task1000ms */
-}
-
-/* USER CODE BEGIN Header_stm32_Task_100ms */
-/**
-* @brief Function implementing the Task100ms thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_stm32_Task_100ms */
-void stm32_Task_100ms(void const * argument)
-{
-  /* USER CODE BEGIN stm32_Task_100ms */
-  TickType_t xLastWakeTime;
-
-  #ifndef osCMSIS
-  const TickType_t xFrequency = pdMS_TO_TICKS(PERIOD_TASK_100ms);
-  #else
-  const TickType_t xFrequency = PERIOD_TASK_100ms;
-  #endif
-
-  #ifndef osCMSIS
-  xLastWakeTime = xTaskGetTickCount();
-  #else
-  xLastWakeTime = osKernelSysTick();
-  #endif
-
-  /* Infinite loop */
-  for(;;)
-  {
-    #ifndef osCMSIS
-    vTaskDelayUntil(&xLastWakeTime, xFrequency);
-    #else
-    osDelayUntil(&xLastWakeTime, xFrequency);
-    #endif
-  }
-  /* USER CODE END stm32_Task_100ms */
+  /* USER CODE END stm32_Task_10ms */
 }
 
 /**
