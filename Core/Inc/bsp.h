@@ -24,7 +24,8 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-
+#include <string.h>
+#include <stdio.h>
 
 /* Exported types ------------------------------------------------------------*/
 typedef enum
@@ -32,6 +33,13 @@ typedef enum
     BSP_LED_OFF = 0u,
     BSP_LED_ON
 } BSP_LED_OnOff;
+
+typedef struct BSP_DebugPrint
+{
+  unsigned char desc[50];
+  uint16_t size;
+} BSP_DebugPrint_t;
+
 
 
 /* Exported constants --------------------------------------------------------*/
@@ -44,8 +52,9 @@ typedef enum
 void BSP_Init(void);
 void BSP_Led(BSP_LED_OnOff OnOff);
 void BSP_LED_Toggle(void);
-
-
+#ifdef DEBUG
+void BSP_DebugPrint(char description[], uint16_t len);
+#endif
 /* Private defines -----------------------------------------------------------*/
 
 

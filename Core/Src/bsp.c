@@ -18,6 +18,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32l0xx_hal_gpio.h"
+#include "stm32l0xx_hal_uart.h"
 #include "bsp.h"
 
 /* typedef -----------------------------------------------------------*/
@@ -83,3 +84,14 @@ void BSP_LED_Toggle()
 {
     HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
 }
+
+extern UART_HandleTypeDef huart2;
+
+#ifdef DEBUG
+void BSP_DebugPrint(char description[], uint16_t len)
+{
+  #ifdef HAL_UART_MODULE_ENABLED
+    HAL_UART_Transmit(&huart2, (uint8_t *)description, len, 100);
+  #endif
+}
+#endif

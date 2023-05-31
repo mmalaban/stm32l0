@@ -23,6 +23,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "bsp.h"
+
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -32,7 +34,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define PERIOD_TASK_10ms  10u
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -41,16 +43,17 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-osThreadId idleTaskHandle;
+UART_HandleTypeDef huart2;
+
 osThreadId Task10msHandle;
 /* USER CODE BEGIN PV */
-static volatile uint32_t count = 0;
+static int count = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-void StartDefaultTask(void const * argument);
+static void MX_USART2_UART_Init(void);
 void stm32_Task_10ms(void const * argument);
 
 /* USER CODE BEGIN PFP */
@@ -90,6 +93,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -111,12 +115,8 @@ int main(void)
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* definition and creation of idleTask */
-  osThreadDef(idleTask, StartDefaultTask, osPriorityIdle, 0, 64);
-  idleTaskHandle = osThreadCreate(osThread(idleTask), NULL);
-
   /* definition and creation of Task10ms */
-  osThreadDef(Task10ms, stm32_Task_10ms, osPriorityNormal, 0, 64);
+  osThreadDef(Task10ms, stm32_Task_10ms, osPriorityNormal, 0, 128);
   Task10msHandle = osThreadCreate(osThread(Task10ms), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
@@ -145,6 +145,7 @@ void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
   /** Configure the main internal regulator output voltage
   */
@@ -178,6 +179,47 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART2;
+  PeriphClkInit.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
+
+/**
+  * @brief USART2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART2_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART2_Init 0 */
+
+  /* USER CODE END USART2_Init 0 */
+
+  /* USER CODE BEGIN USART2_Init 1 */
+
+  /* USER CODE END USART2_Init 1 */
+  huart2.Instance = USART2;
+  huart2.Init.BaudRate = 115200;
+  huart2.Init.WordLength = UART_WORDLENGTH_8B;
+  huart2.Init.StopBits = UART_STOPBITS_1;
+  huart2.Init.Parity = UART_PARITY_NONE;
+  huart2.Init.Mode = UART_MODE_TX_RX;
+  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+  huart2.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+  huart2.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+  if (HAL_UART_Init(&huart2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART2_Init 2 */
+
+  /* USER CODE END USART2_Init 2 */
+
 }
 
 /**
@@ -199,14 +241,6 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : PA2 PA15 */
-  GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_15;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-  GPIO_InitStruct.Alternate = GPIO_AF4_USART2;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
   /*Configure GPIO pin : LD3_Pin */
   GPIO_InitStruct.Pin = LD3_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -222,25 +256,6 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE END 4 */
 
-/* USER CODE BEGIN Header_StartDefaultTask */
-/**
-  * @brief  Function implementing the idleTask thread.
-  * @param  argument: Not used
-  * @retval None
-  */
-/* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void const * argument)
-{
-  /* USER CODE BEGIN 5 */
-  /* Infinite loop */
-  for(;;)
-  {
-	  count++;
-    osDelay(1);
-  }
-  /* USER CODE END 5 */
-}
-
 /* USER CODE BEGIN Header_stm32_Task_10ms */
 /**
 * @brief Function implementing the Task10ms thread.
@@ -250,14 +265,26 @@ void StartDefaultTask(void const * argument)
 /* USER CODE END Header_stm32_Task_10ms */
 void stm32_Task_10ms(void const * argument)
 {
-  /* USER CODE BEGIN stm32_Task_10ms */
+  /* USER CODE BEGIN 5 */
   /* Infinite loop */
   for(;;)
   {
-    BSP_LED_Toggle();
-    osDelay(PERIOD_TASK_10ms);
+	   count++;
+   if((count%50) == 0)
+   {
+	   char buffer[50];
+	   uint16_t len;
+
+	   len = snprintf(buffer, sizeof buffer, "counter = %d\r\n", count/10);
+	   BSP_DebugPrint(buffer, len);
+
+
+	   BSP_LED_Toggle();
+   }
+
+    osDelay(TASK_PERIOD_10ms);
   }
-  /* USER CODE END stm32_Task_10ms */
+  /* USER CODE END 5 */
 }
 
 /**
