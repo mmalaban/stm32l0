@@ -16,47 +16,31 @@
   */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef INC_BSP_H_
-#define INC_BSP_H_
+#ifndef INC_BSP_CFG_H_
+#define INC_BSP_CFG_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "bsp_cfg.h"
+
 
 /* Exported types ------------------------------------------------------------*/
-typedef enum
-{
-    BSP_LED_OFF = 0u,
-    BSP_LED_ON
-} BSP_LED_OnOff;
 
 
 /* Exported constants --------------------------------------------------------*/
 
 
 /* Exported macro ------------------------------------------------------------*/
-#define BSP_STM32L0
+#ifdef STM32L031xx
+#define NUCLEOL031K6 1U
+#endif
+
 
 /* Exported functions prototypes ---------------------------------------------*/
-void BSP_Init(void);
-
-#if defined(STM32L031xx) && defined(NUCLEOL031K6)
-void BSP_Led(BSP_LED_OnOff OnOff);
-#endif
-
-#if defined(STM32L031xx) && defined(NUCLEOL031K6)
-void BSP_LED_Toggle(void);
-#endif
 
 
-#ifdef DEBUG
-#if defined(STM32L031xx) && defined(NUCLEOL031K6)
-void BSP_DebugPrint(int num_args, const char *format, ...);
-#endif
-#endif
 /* Private defines -----------------------------------------------------------*/
 
 
@@ -64,4 +48,4 @@ void BSP_DebugPrint(int num_args, const char *format, ...);
 }
 #endif
 
-#endif /* INC_BSP_H_ */
+#endif /* INC_BSP_CFG_H_ */

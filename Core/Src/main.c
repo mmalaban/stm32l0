@@ -269,18 +269,20 @@ void stm32_Task_10ms(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-	   count++;
-   if((count%50) == 0)
-   {
-	   char buffer[50];
-	   uint16_t len;
+    count++;
+    if((count%10) == 0)
+    {
+      BSP_DebugPrint(1, "count = %d", (count/10));
 
-	   len = snprintf(buffer, sizeof buffer, "counter = %d\r\n", count/10);
-	   BSP_DebugPrint(buffer, len);
+    }
 
-
-	   BSP_LED_Toggle();
-   }
+    if((count%100) == 0)
+    {
+      static int toggle_cnt = 0;
+      BSP_LED_Toggle();
+      BSP_DebugPrint(1, "Toggle count: %d", toggle_cnt);
+      toggle_cnt++;
+    }
 
     osDelay(TASK_PERIOD_10ms);
   }
