@@ -1,6 +1,12 @@
 # Understand for C
 *.udb
 
+# tools
+**/__pycache__
+
+# eclipse
+.settings/
+
 ### Debug folder ###
 # object files
 Debug/**/*.o

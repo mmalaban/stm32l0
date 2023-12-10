@@ -14,10 +14,9 @@
 			"**/Thumbs.db": true,
 			"**/LICENSE.txt": true,
 			"**/License.md": true,
-			"**/*.*project":true,
-			".settings": true,
 			"stm32l0.ioc": true,
 			"stm32l0 Debug.launch": true,
+			"stm32l0.udb": true
 		},
 		"files.associations": {
 			"*.h": "c",
