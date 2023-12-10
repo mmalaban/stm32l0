@@ -92,7 +92,7 @@ int main(void)
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
-  MX_GPIO_Init();
+  // MX_GPIO_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
@@ -222,6 +222,9 @@ static void MX_USART2_UART_Init(void)
 
 }
 
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
 /**
   * @brief GPIO Initialization Function
   * @param None
@@ -251,7 +254,7 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
 }
-
+#pragma GCC diagnostic pop
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
@@ -266,13 +269,14 @@ static void MX_GPIO_Init(void)
 void stm32_Task_10ms(void const * argument)
 {
   /* USER CODE BEGIN 5 */
+	(void)argument;
   /* Infinite loop */
   for(;;)
   {
     count++;
     if((count%10) == 0)
     {
-      BSP_DebugPrint(1, "count = %d", (count/10));
+      BSP_DebugPrint("count = %d", (count/10));
 
     }
 
@@ -280,7 +284,7 @@ void stm32_Task_10ms(void const * argument)
     {
       static int toggle_cnt = 0;
       BSP_LED_Toggle();
-      BSP_DebugPrint(1, "Toggle count: %d", toggle_cnt);
+      BSP_DebugPrint("Toggle count: %d", toggle_cnt);
       toggle_cnt++;
     }
 

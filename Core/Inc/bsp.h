@@ -54,7 +54,7 @@ void BSP_LED_Toggle(void);
 
 #ifdef DEBUG
 #if defined(STM32L031xx) && defined(NUCLEOL031K6)
-void BSP_DebugPrint(int num_args, const char *format, ...);
+void BSP_DebugPrint(const char *format, ...);
 #endif
 #endif
 /* Private defines -----------------------------------------------------------*/

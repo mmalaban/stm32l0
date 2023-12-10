@@ -105,7 +105,7 @@ void BSP_LED_Toggle()
   * @param  line: description of parameter
   * @retval <name_of_retval>:  description of return value
   */
-void BSP_DebugPrint(int num_args, const char *format, ...)
+void BSP_DebugPrint(const char *format, ...)
 {
   va_list args;
 #ifdef DEBUG
@@ -125,7 +125,6 @@ void BSP_DebugPrint(int num_args, const char *format, ...)
     return;
   #endif /* HAL_UART_MODULE_ENABLED */
 #else
-  (void)num_args;
   (void)format;
   (void)args;
 #endif /* DEBUG */
