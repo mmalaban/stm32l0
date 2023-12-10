@@ -1,3 +1,6 @@
+# Understand for C
+*.udb
+
 ### Debug folder ###
 # object files
 Debug/**/*.o
