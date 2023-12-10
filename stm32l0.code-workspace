@@ -16,7 +16,8 @@
 			"**/License.md": true,
 			"stm32l0.ioc": true,
 			"stm32l0 Debug.launch": true,
-			"stm32l0.udb": true
+			"stm32l0.udb": true,
+			".settings": true
 		},
 		"files.associations": {
 			"*.h": "c",
